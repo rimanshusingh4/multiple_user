@@ -2,7 +2,6 @@
   "name": "multiple_user",
   "version": "1.0.0",
   "description": "In this Repo i'll show you how to create multiple role based authentication",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
@@ -19,8 +18,12 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "express-validator": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.9.0",
     "mongoose": "^8.6.3"
