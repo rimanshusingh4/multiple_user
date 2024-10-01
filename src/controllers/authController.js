@@ -112,40 +112,39 @@ const login = async (req, res)=>{
     }
 }
 
-// const getCurrentUser = async(req, res) => {
-//     console.log(req.user)
-//     return res
-//     .status(200)
-//     .json({
-//         data:req.user,
-//         message: "User fetched successfully"
-//     })
-// }
 
-const logoutUser = async(req, res) => {
+const logoutUser = async (req, res) => {
+    // Unset the token from the database
     await User.findByIdAndUpdate(
         req.user._id,
         {
             $unset: {
-                token: "" // Unsetting a field requires setting its value to an empty string
+                token: "" // Unsetting the token field from the user's document
             }
         },
         {
-            new: true // This option returns the updated document
+            new: true // Return the updated document
         }
     );
-    console.log("From Logout",req.user._id)
 
+    console.log("From Logout", req.user._id);
+
+    // Define cookie options for clearing
     const options = {
-        httpOnly: true,
-        secure: true
-    }
+        httpOnly: true,         // Cookie cannot be accessed by JavaScript
+        secure: true,           // Cookie is sent only over HTTPS
+        sameSite: 'Strict',     // Prevent cross-site requests from sending the cookie
+        path: '/'               // Ensure the cookie is cleared for the entire domain
+    };
 
+    // Clear the auth cookie and respond
     return res
-    .status(200)
-    .clearCookie("authcookie", options)
-    .json({message: "User logged Out"})
-}
+        .status(200)
+        .clearCookie("authcookie", options)
+        .json({ message: "User logged out successfully" });
+};
+
+
 
 
 

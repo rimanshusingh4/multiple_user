@@ -2,7 +2,6 @@ const express = require('express')
 const router = express.Router()
 const {adminRegister, userRegister, login} = require('../controllers/authController.js');
 const { check } = require('express-validator');
-const { verifyToken } = require('../middlewares/authMiddleware.js');
 
 
 router.post("/adminRegister",
