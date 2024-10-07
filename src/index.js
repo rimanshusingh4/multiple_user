@@ -1,5 +1,6 @@
 const authRoutes = require('./routes/authRoutes.js')
 const userRoutes = require('./routes/userRoutes.js')
+const videoRoutes = require('./routes/videoRoutes.js')
 const dotenv = require("dotenv")
 const dbConnect = require("./config/dbConnect.js")
 const express = require("express")
@@ -46,3 +47,4 @@ dbConnect()
 //defining routes
 app.use("/api/auth", authRoutes)
 app.use("/api", userRoutes)
+app.use("/api/video", videoRoutes)
