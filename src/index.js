@@ -1,6 +1,6 @@
 const authRoutes = require('./routes/authRoutes.js')
 const userRoutes = require('./routes/userRoutes.js')
-const videoRoutes = require('./routes/videoRoutes.js')
+const projectRoutes = require('./routes/projectRoutes.js')
 const dotenv = require("dotenv")
 const dbConnect = require("./config/dbConnect.js")
 const express = require("express")
@@ -15,12 +15,9 @@ dotenv.config({
 })
 
 //middleware
-app.use(bodyParser.urlencoded({extended:true}))
-app.use(bodyParser.json())
 app.use(cookieParser())
-app.use(express.json())
 app.use(cors({
-    origin: 'http://localhost:5173/',
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
     allowedHeaders: [
         'Content-Type',
@@ -32,6 +29,9 @@ app.use(cors({
     credentials: true,
     })
 )
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json())
+app.use(express.json())
 
 //calling database and starting server
 dbConnect()
@@ -47,4 +47,4 @@ dbConnect()
 //defining routes
 app.use("/api/auth", authRoutes)
 app.use("/api", userRoutes)
-app.use("/api/video", videoRoutes)
+app.use("/", projectRoutes)

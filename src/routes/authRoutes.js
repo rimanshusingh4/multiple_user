@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const {adminRegister, userRegister, login} = require('../controllers/authController.js');
 const { check } = require('express-validator');
+const { getCurrentUser } = require('../middlewares/authMiddleware.js');
 
 
 router.post("/adminRegister",

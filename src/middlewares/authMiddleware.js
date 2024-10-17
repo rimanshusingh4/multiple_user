@@ -5,7 +5,11 @@ const verifyToken = async (req, res, next) => {
     let token;
 
     // Get the token from cookies or Authorization header
-    const authHeader = req.cookies?.authcookie  || req.header("Authorization")?.replace("Bearer ", "");
+    const authHeader = ((req.cookies?.authcookie)|| (req.header("Authorization") && req.header("Authorization").replace("Bearer ", "")));
+    // const authHeader = (req.cookies && req.cookies.authcookie) ||  
+    // (req.header("Authorization") && req.header("Authorization").replace("Bearer ", ""));
+    console.log("Token is here: ",authHeader)
+
     if (authHeader) {
         token = authHeader; // Set the token
     } else {
@@ -32,6 +36,7 @@ const verifyToken = async (req, res, next) => {
 
         // Attach the user to the request object
         req.user = user;
+        console.log("user is authorized")
         next(); // Proceed to the next middleware or route handler
     } catch (error) {
         return res.status(400).json({ message: "Token is not valid" });
@@ -47,11 +52,11 @@ const getCurrentUser = async (req, res, next) => {
             message: "Unauthorized access, no user found"
         });
     }
-
-    return res.status(200).json({
+    return res.status(301)
+    .json({
+        message: "User Found",
         data: req.user,
-        message: "User fetched successfully"
-    });
+    })
     next();
 };
 

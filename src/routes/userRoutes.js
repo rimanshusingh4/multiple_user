@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.get("/current-user",verifyToken,getCurrentUser, (req,res)=>{
 })
-router.get("/logout",verifyToken, logoutUser,(req,res)=>{
+router.post("/logout",verifyToken, logoutUser,(req,res)=>{
+    console.log('Received cookies:', req.cookies); // Check all received cookies
+    console.log('Request Headers:', req.headers); 
 })
 module.exports= router

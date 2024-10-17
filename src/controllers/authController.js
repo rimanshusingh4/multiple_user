@@ -9,7 +9,7 @@ const adminRegister = async (req, res)=>{
         const existedUser = await User.findOne({email})
         if (existedUser) {
             return res
-            .status(500)
+            .status(501)
             .json({
                 message: "Email already Register."
             })
@@ -21,7 +21,8 @@ const adminRegister = async (req, res)=>{
         return res
         .status(201)
         .json({
-                message: `Admin Register`
+                message: `Admin Register`,
+                ok: true,
         })
     } catch (error) {
         return res
@@ -35,11 +36,12 @@ const adminRegister = async (req, res)=>{
 
 const userRegister = async (req, res)=>{
     try {
+        // console.log("body",req.body)
         const {fullname, email ,password} = req.body;
         const existedUser = await User.findOne({email})
         if (existedUser) {
             return res
-            .status(500)
+            .status(501)
             .json({
                 message: "Email already Register."
             })
@@ -51,7 +53,8 @@ const userRegister = async (req, res)=>{
         return res
         .status(201)
         .json({
-                message: `User Register`
+                message: `User Register`,
+                ok: true,
         })
     } catch (error) {
         return res
@@ -75,7 +78,7 @@ const login = async (req, res)=>{
         }
         const isMatch = await bcrypt.compare(password, user.password)
         if(!isMatch){
-            return res.status(400).json(
+            return res.status(403).json(
                 {
                     message: `Wrong Password`
                 }
@@ -84,7 +87,7 @@ const login = async (req, res)=>{
         
         const token = jwt.sign({
             id: user._id,
-            role: user.role
+            role: user.role,
         },
         process.env.JWT_SECRET,
         {
@@ -96,11 +99,29 @@ const login = async (req, res)=>{
         );
         console.log(`${result.modifiedCount} document(s) was/were updated.`);
         // console.log(user)
-        res
-        .cookie('authcookie',token,{maxAge:3600,httpOnly:true}) 
-        .status(200).json({
-            message:  `${user.role} Login`, 
-        })
+        // res.cookie('authcookie', token, {
+        //     maxAge: 3600000, // 1 hour in milliseconds
+        //     httpOnly: true, // Prevent JavaScript access to the cookie
+        //     secure: process.env.NODE_ENV === 'production', // Only use in HTTPS in production
+        //     sameSite: 'Strict', // Prevent CSRF
+        //     path: '/' // Make it accessible on all paths
+        // });
+        // console.log(token)
+        res.cookie('authcookie', token, {
+            maxAge: 3600000,
+            httpOnly: true,
+            secure: false, // Change to true in production
+            sameSite: 'none', // Change to 'lax' for same-site requests
+            path: '/'
+        })        
+        .status(200)
+        .json({
+            message: "Login Successful", 
+            token: token,
+            role: user.role,
+            ok: true,
+        });
+        
 
     } catch (error) {
         res.status(500).json(
@@ -115,6 +136,7 @@ const login = async (req, res)=>{
 
 const logoutUser = async (req, res) => {
     // Unset the token from the database
+    // console.log("User is from logout",req.user)
     await User.findByIdAndUpdate(
         req.user._id,
         {
@@ -133,7 +155,6 @@ const logoutUser = async (req, res) => {
     const options = {
         httpOnly: true,         // Cookie cannot be accessed by JavaScript
         secure: true,           // Cookie is sent only over HTTPS
-        sameSite: 'Strict',     // Prevent cross-site requests from sending the cookie
         path: '/'               // Ensure the cookie is cleared for the entire domain
     };
 
