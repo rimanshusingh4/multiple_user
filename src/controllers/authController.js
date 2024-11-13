@@ -65,73 +65,60 @@ const userRegister = async (req, res)=>{
     }
 }
 
-const login = async (req, res)=>{
+const login = async (req, res) => {
     try {
-        const {email, password } = req.body
-        const user = await User.findOne({email})
-        if(!user){
-            return res.status(404).json(
-                {
-                    message: `User with email ${email} not Found`
-                }
-            )
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                message: `User with email ${email} not found`
+            });
         }
-        const isMatch = await bcrypt.compare(password, user.password)
-        if(!isMatch){
-            return res.status(403).json(
-                {
-                    message: `Wrong Password`
-                }
-            )
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(403).json({
+                message: `Wrong password`
+            });
         }
         
-        const token = jwt.sign({
-            id: user._id,
-            role: user.role,
-        },
-        process.env.JWT_SECRET,
-        {
-            expiresIn: "1h"
-        });
-        const result = await User.updateOne(
-            { _id: user._id },             // Filter condition
-            { $set: { token: token } } // Update only the token field
+        const token = jwt.sign(
+            {
+                id: user._id,
+                role: user.role,
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h"
+            }
         );
-        console.log(`${result.modifiedCount} document(s) was/were updated.`);
-        // console.log(user)
-        // res.cookie('authcookie', token, {
-        //     maxAge: 3600000, // 1 hour in milliseconds
-        //     httpOnly: true, // Prevent JavaScript access to the cookie
-        //     secure: process.env.NODE_ENV === 'production', // Only use in HTTPS in production
-        //     sameSite: 'Strict', // Prevent CSRF
-        //     path: '/' // Make it accessible on all paths
-        // });
-        // console.log(token)
-        res.cookie('authcookie', token, {
-            maxAge: 3600000,
-            httpOnly: true,
-            secure: false, // Change to true in production
-            sameSite: 'none', // Change to 'lax' for same-site requests
-            path: '/'
-        })        
+        
+        await User.updateOne(
+            { _id: user._id },
+            { $set: { token: token } }
+        );
+
+        res.cookie("authcookie", token, {
+            expires: new Date(Date.now() + 3600000), // 1 hour
+            httpOnly: false, // keep httpOnly false if u want to store it in client side like CONTEXTAPI or want to access via javascript.
+            secure: process.env.NODE_ENV === "production", // Only HTTPS in production
+            // sameSite: "Strict", // Prevent CSRF attacks
+            path: "/" // Accessible on all paths
+        })
         .status(200)
         .json({
-            message: "Login Successful", 
-            token: token,
+            message: "Login successful",
             role: user.role,
-            ok: true,
+            ok: true
         });
         
-
     } catch (error) {
-        res.status(500).json(
-            {
-                message: `User not Found`
-            }
-        )
-        console.log("Error from Login Controller", error)
+        res.status(500).json({
+            message: `User not found`
+        });
+        console.error("Error from Login Controller", error);
     }
-}
+};
+
 
 
 const logoutUser = async (req, res) => {

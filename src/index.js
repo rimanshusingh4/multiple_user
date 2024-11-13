@@ -15,7 +15,6 @@ dotenv.config({
 })
 
 //middleware
-app.use(cookieParser())
 app.use(cors({
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
@@ -27,11 +26,12 @@ app.use(cors({
         'Pragma'
     ],
     credentials: true,
-    })
+})
 )
-app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json())
 app.use(express.json())
+app.use(cookieParser())
+app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: true }));
 
 //calling database and starting server
 dbConnect()

@@ -5,9 +5,10 @@ const verifyToken = async (req, res, next) => {
     let token;
 
     // Get the token from cookies or Authorization header
-    const authHeader = ((req.cookies?.authcookie)|| (req.header("Authorization") && req.header("Authorization").replace("Bearer ", "")));
-    // const authHeader = (req.cookies && req.cookies.authcookie) ||  
-    // (req.header("Authorization") && req.header("Authorization").replace("Bearer ", ""));
+    // const authHeader = ((req.cookies?.authcookie)|| (req.header("Authorization") && req.header("Authorization").replace("Bearer ", "")));
+    const authHeader = (req.cookies && req.cookies.authcookie) ||  
+                    (req.header("Authorization") && req.header("Authorization").replace("Bearer ", ""));
+
     console.log("Token is here: ",authHeader)
 
     if (authHeader) {
@@ -52,12 +53,12 @@ const getCurrentUser = async (req, res, next) => {
             message: "Unauthorized access, no user found"
         });
     }
+    next();
     return res.status(301)
     .json({
         message: "User Found",
         data: req.user,
     })
-    next();
 };
 
 module.exports = { verifyToken, getCurrentUser };
