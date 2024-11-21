@@ -68,12 +68,13 @@ const userRegister = async (req, res)=>{
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email })
         if (!user) {
             return res.status(404).json({
                 message: `User with email ${email} not found`
             });
         }
+        console.log(user._id)
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(403).json({
@@ -96,7 +97,9 @@ const login = async (req, res) => {
             { _id: user._id },
             { $set: { token: token } }
         );
-
+        const loggedInUser = await User.findOne(user._id) // yaha hum 107 line ko firse database call kar rhe hai.
+        .select("_id fullname email role updatedAt")
+        console.log("Logged In User",loggedInUser)
         res.cookie("authcookie", token, {
             expires: new Date(Date.now() + 3600000), // 1 hour
             httpOnly: false, // keep httpOnly false if u want to store it in client side like CONTEXTAPI or want to access via javascript.
@@ -108,6 +111,7 @@ const login = async (req, res) => {
         .json({
             message: "Login successful",
             role: user.role,
+            user: user,
             ok: true
         });
         

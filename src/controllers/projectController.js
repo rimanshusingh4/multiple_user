@@ -90,6 +90,8 @@ const addProject = async (req, res) => {
     if (!title?.trim() || !description?.trim()) {
         return res.status(400).json({ message: "Title is required" });
     }
+    console.log("title is: ", title);
+    console.log("description is: ", description);
 
     // Check if thumbnail is uploaded
     const thumbnailFile = req.files?.thumbnail?.[0]?.path;
@@ -102,7 +104,8 @@ const addProject = async (req, res) => {
     if (!projectFile) {
         return res.status(400).json({ message: "Project file is required" });
     }
-
+    console.log("thumbnailFile is: ", thumbnailFile);
+    console.log("projectFile is: ", projectFile);
     try {
         // Upload thumbnail to Cloudinary
         const thumbnail = await uploadOnCloudinary(thumbnailFile);
@@ -143,6 +146,38 @@ const addProject = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
+const getProjectById = async (req, res) => {
+    try {
+        const { adminId } = req.params;  // adminId from route parameters
+        console.log("adminId is: ", adminId);
+
+        const projects = await Project.aggregate([
+            {
+                $match: {
+                    owner: new mongoose.Types.ObjectId(adminId), // Match the `owner` field with adminId
+                },
+            },
+        ]);
+
+        if (!projects || projects.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No projects found for this admin.",
+                projects: [],
+            });
+        }
+        return res.status(200).json({
+            docs: projects,
+        });
+    } catch (error) {
+        console.error("Error fetching projects:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+
+
 
 const deleteProject = async (req, res) => {
     const { projectId } = req.params;  // Access projectId from req.params
@@ -178,5 +213,6 @@ const deleteProject = async (req, res) => {
 module.exports = {
     addProject,
     getAllProjects,
+    getProjectById,
     deleteProject,
 };

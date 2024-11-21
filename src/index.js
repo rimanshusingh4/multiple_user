@@ -47,4 +47,4 @@ dbConnect()
 //defining routes
 app.use("/api/auth", authRoutes)
 app.use("/api", userRoutes)
-app.use("/", projectRoutes)
+app.use("/api/project", projectRoutes)
