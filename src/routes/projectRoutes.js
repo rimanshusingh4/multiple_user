@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const {verifyToken, getCurrentUser} = require('../middlewares/authMiddleware.js');
 const {isAdmin} = require('../middlewares/adminMiddleware.js')
-const {addProject, getAllProjects, deleteProject, getProjectById}  = require('../controllers/projectController.js');
+const {addProject, getAllProjects, deleteProject, getProjectByAdminId, getProjectById}  = require('../controllers/projectController.js');
 const multer = require('multer');
 const upload = multer({ dest: './public/temp' }); // Set your upload destination
 
@@ -14,7 +14,8 @@ const uploadFields = upload.fields([
 
 router.get("/", getAllProjects);
 router.post("/add", verifyToken,isAdmin, uploadFields, addProject);
-router.get('/:adminId', getProjectById);  
+router.get('/:adminId', getProjectByAdminId);  
+router.get('/details/:projectId', getProjectById);  
 router.delete("/delete/:projectId", verifyToken, isAdmin, deleteProject);
 
 module.exports = router;

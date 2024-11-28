@@ -40,27 +40,6 @@ const getAllProjects = async(req, res)=>{
         pipeline.push({ $sort: { createdAt: -1 } });
     }
 
-    // //Lookup to get owner's details
-    // pipeline.push(
-    //     {
-    //         $lookup: {
-    //             from: "users",
-    //             localField: "owner",
-    //             foreignField: "_id",
-    //             as: "ownerDetails",
-    //             pipeline: [
-    //                 {
-    //                     $project: {
-    //                         fullname: 1,
-    //                     }
-    //                 }
-    //             ]
-    //         }
-    //     },
-    //     {
-    //         $unwind: "$ownerDetails"
-    //     }
-    // );
 
     const projectAggregate = Project.aggregate(pipeline);
     // console.log("projectAggregate is: ",projectAggregate)
@@ -104,8 +83,8 @@ const addProject = async (req, res) => {
     if (!projectFile) {
         return res.status(400).json({ message: "Project file is required" });
     }
-    console.log("thumbnailFile is: ", thumbnailFile);
-    console.log("projectFile is: ", projectFile);
+    // console.log("thumbnailFile is: ", thumbnailFile);
+    // console.log("projectFile is: ", projectFile);
     try {
         // Upload thumbnail to Cloudinary
         const thumbnail = await uploadOnCloudinary(thumbnailFile);
@@ -146,10 +125,35 @@ const addProject = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
+
 const getProjectById = async (req, res) => {
     try {
+        const { projectId } = req.params;
+
+        // Validate the id
+        if (!mongoose.Types.ObjectId.isValid(projectId)) {
+            return res.status(400).json({ message: "Invalid project ID" });
+        }
+
+        // Find the project by ID
+        const project = await Project.findById(projectId);
+        if (!project) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        // Return the project if found
+        return res.status(200).json(project);
+    } catch (error) {
+        console.error("Error fetching project:", error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+
+const getProjectByAdminId = async (req, res) => {
+    try {
         const { adminId } = req.params;  // adminId from route parameters
-        console.log("adminId is: ", adminId);
+        // console.log("adminId is: ", adminId);
 
         const projects = await Project.aggregate([
             {
@@ -214,5 +218,6 @@ module.exports = {
     addProject,
     getAllProjects,
     getProjectById,
+    getProjectByAdminId,
     deleteProject,
 };
