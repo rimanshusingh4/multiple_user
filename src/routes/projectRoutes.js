@@ -8,7 +8,8 @@ const upload = multer({ dest: './public/temp' }); // Set your upload destination
 
 const uploadFields = upload.fields([
     { name: 'thumbnail', maxCount: 1 }, // Expect a 'thumbnail' field with max 1 file
-    { name: 'file', maxCount: 1 } // Expect a 'file' field with max 1 file
+    { name: 'file', maxCount: 1 }, // Expect a 'file' field with max 1 file
+    { name: 'demoVideo', maxCount: 1 },
 ]);
 // Use addProject as the callback after verifyToken middleware
 

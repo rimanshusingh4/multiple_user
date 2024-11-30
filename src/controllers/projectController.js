@@ -1,5 +1,5 @@
 const Project = require('../models/projectModel.js');
-const { uploadOnCloudinary, deleteOnCloudinary } = require('../config/uploadOnCloudinary.js');
+const { uploadOnCloudinary, deleteOnCloudinary, uploadVideoOnCloudinary } = require('../config/uploadOnCloudinary.js');
 const mongoose = require ("mongoose")
 
 
@@ -62,17 +62,17 @@ const getAllProjects = async(req, res)=>{
 }
 
 const addProject = async (req, res) => {
-
-    const { title, description } = req.body;
+    // console.log(req.body)
+    const { title, description, liveLink, techStack  } = req.body;
 
     // Check if required fields are missing
     if (!title?.trim() || !description?.trim()) {
         return res.status(400).json({ message: "Title is required" });
     }
-    console.log("title is: ", title);
-    console.log("description is: ", description);
+    if (!liveLink?.trim() || !techStack?.trim()) {
+        return res.status(400).json({ message: "Live Link and Tech stack is required" });
+    }
 
-    // Check if thumbnail is uploaded
     const thumbnailFile = req.files?.thumbnail?.[0]?.path;
     if (!thumbnailFile) {
         return res.status(400).json({ message: "Thumbnail is required" });
@@ -83,31 +83,40 @@ const addProject = async (req, res) => {
     if (!projectFile) {
         return res.status(400).json({ message: "Project file is required" });
     }
-    // console.log("thumbnailFile is: ", thumbnailFile);
-    // console.log("projectFile is: ", projectFile);
+    const videoFile = req.files?.demoVideo[0].path;
+
+    if (!videoFile) {
+        return res.status(400).json({ message: "Invalid or missing video file" });
+    }
+    console.log("Demo Video is: ", videoFile);
     try {
         // Upload thumbnail to Cloudinary
         const thumbnail = await uploadOnCloudinary(thumbnailFile);
         if (!thumbnail) {
             return res.status(400).json({ message: "Thumbnail upload failed" });
         }
-
         const file = await uploadOnCloudinary(projectFile);
         if (!file) {
             return res.status(400).json({ message: "File upload failed" });
         }
-
+        const size = Math.round((file.bytes / 1048576));
+        const demoVideo = await uploadVideoOnCloudinary(videoFile);
+        if (!demoVideo) {
+            return res.status(400).json({ message: "Video upload failed" });
+        }
         // Create the project in the database
-        const size = Math.round((file.bytes / 1048576))
         const project = await Project.create({
             title,
             description,
+            liveLink,
+            techStack,
             thumbnail: thumbnail.url,
             file: {
                 url: file.url,
                 public_id: file.public_id,
                 size: size,
             },
+            demoVideo: demoVideo.url,
             owner: req.user?._id, // Ensure `req.user` is populated by auth middleware
         });
 
@@ -116,7 +125,8 @@ const addProject = async (req, res) => {
         if (!projectUploaded) {
             return res.status(500).json({ message: "Project upload failed, please try again" });
         }
-
+        console.log("projectUploaded is: ", projectUploaded);
+        console.log("Project created successfully",project)
         // Return success response
         return res.status(200).json({ project: projectUploaded, message: "Project uploaded successfully" });
     } catch (error) {

@@ -11,6 +11,14 @@ const projectSchema = new mongoose.Schema({
         type: String, 
         required: true
     },
+    liveLink: {
+        type: String, 
+        required: true
+    },
+    techStack: {
+        type: String, 
+        required: true
+    },
     file: {
         url:{
             type: String,
@@ -26,6 +34,10 @@ const projectSchema = new mongoose.Schema({
         }
     },
     thumbnail: {
+        type: String, //cloudinary url
+        required: true
+    },
+    demoVideo: {
         type: String, //cloudinary url
         required: true
     },

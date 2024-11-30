@@ -1,6 +1,6 @@
+const path = require("path");
 const cloudinary = require('cloudinary').v2
 const fs = require("fs");
-
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -9,8 +9,9 @@ cloudinary.config({
 
 
 
+
 const uploadOnCloudinary = async (localFilePath) => {
-    // console.log(localFilePath);
+    console.log(localFilePath);
     try {
         if (!localFilePath) {
             console.log('Local file path is null or undefined.');
@@ -25,7 +26,7 @@ const uploadOnCloudinary = async (localFilePath) => {
         //upload to cloudinary if localFilePath exists
         const result = await cloudinary.uploader.upload(localFilePath, {
             resource_type: 'auto',
-            transformation: {flags: 'attachment'}
+            transformation: { flags: 'attachment' },
         });
 
         // console.log("file uploaded to cloudinary", result.url);
@@ -37,6 +38,37 @@ const uploadOnCloudinary = async (localFilePath) => {
         return error;
     }
 };
+
+const uploadVideoOnCloudinary = async (localFilePath) => {
+    console.log(localFilePath);
+    try {
+        if (!localFilePath) {
+            console.log('Local file path is null or undefined.');
+            return null;
+        }
+
+        if (!fs.existsSync(localFilePath)) {
+            console.log(`File '${localFilePath}' does not exist.`);
+            return null;
+        }
+
+        //upload to cloudinary if localFilePath exists
+        const result = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: 'auto',
+        });
+
+        // console.log("file uploaded to cloudinary", result.url);
+
+        fs.unlinkSync(localFilePath); //remove file from localFilePath after uploading to cloudinary
+        return result;
+    } catch (error) {
+        fs.unlinkSync(localFilePath);
+        return error;
+    }
+};
+
+
+
 
 
 const deleteOnCloudinary = async (public_id, resource_type="image") => {
@@ -54,4 +86,4 @@ const deleteOnCloudinary = async (public_id, resource_type="image") => {
     }
 };
 
-module.exports= { uploadOnCloudinary, deleteOnCloudinary };
+module.exports= { uploadOnCloudinary, uploadVideoOnCloudinary, deleteOnCloudinary };
